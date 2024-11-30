@@ -2,7 +2,8 @@ const { downloadHistory, downloadContentFromMessage } = require("baileys");
 const readline = require("readline");
 const path = require("path");
 const { writeFile } = require("fs/promises");
-const { TEMP_DIR } = require("../config");
+const { TEMP_DIR, COMMANDS_DIR } = require("../config");
+const fs = require("fs");
 
 exports.question = (message) => {
     const rl = readline.createInterface({
@@ -95,7 +96,7 @@ exports.getContent = (webMessage, context) => {
     return (
         !!webMessage.message?.[`${contex}Message`] ||
         !!webMessage.message?.extendedTextMessage?.contextInfo.quotedMessage?.[
-            `${context}Message`
+        `${context}Message`
         ]
     );
 };
@@ -121,3 +122,21 @@ exports.download = async (webMessage, fileName, context, extension) => {
 
     return filePath;
 }
+
+exports.findCommandImport = () => { };
+
+exports.readCommandImport = () => {
+    const subDirectories = fs
+    .readdirSync(COMMANDS_DIR, {withFileTypes: true})
+    .filter((directory) => directory.isDirectory())
+    .map((directory) => directory.name);
+
+    const commandImport = {};
+
+    for (const subdir of subDirectories) {
+        const subdirectoryPath = path.join(COMMANDS_DIR, subdir);
+        const files = fs
+        .readdirSync(subdirectoryPath)
+        .filter((file) => !file.startsWith("_") && file.endsWith(".js") || file.endsWith(".ts"));
+    }
+};
