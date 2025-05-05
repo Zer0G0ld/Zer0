@@ -23,6 +23,15 @@ class XP(commands.Cog):
         with open(self.file, 'w', encoding='utf-8') as f:
             json.dump(self.user_xp, f, indent=4)
 
+    def add_xp_to_user(self, user_id, min_xp=5, max_xp=15):
+        """Adiciona XP ao usuário e salva os dados."""
+        if user_id not in self.user_xp:
+            self.user_xp[user_id] = {"xp": 0, "last_message": None}
+
+        self.user_xp[user_id]["xp"] += random.randint(min_xp, max_xp)
+        self.user_xp[user_id]["last_message"] = datetime.utcnow().isoformat()
+        self.save_xp()
+
     @commands.Cog.listener()
     async def on_message(self, message):
         """Dá XP ao usuário sempre que ele enviar uma mensagem."""
@@ -30,15 +39,7 @@ class XP(commands.Cog):
             return  # Ignora mensagens de bots
 
         user_id = str(message.author.id)
-
-        if user_id not in self.user_xp:
-            self.user_xp[user_id] = {"xp": 0, "last_message": None}
-
-        # Adiciona entre 5 e 20 XP
-        self.user_xp[user_id]["xp"] += random.randint(5, 20)
-        self.user_xp[user_id]["last_message"] = datetime.utcnow().isoformat()
-
-        self.save_xp()
+        self.add_xp_to_user(user_id)
 
     @commands.command(name="xp")
     async def show_xp(self, ctx):
